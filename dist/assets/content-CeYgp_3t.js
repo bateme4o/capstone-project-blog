@@ -1,0 +1,2 @@
+import{e as n}from"./posts-service-z_18iu8_.js";function i(t){return t?new Intl.DateTimeFormat("en",{month:"short",day:"numeric",year:"numeric"}).format(new Date(t)):"Draft"}function s(t=""){const r=String(t).trim().split(/\s+/).filter(Boolean).length;return Math.max(1,Math.ceil(r/220))}function o(t="",r=160){const e=String(t).replace(/\s+/g," ").trim();return e.length<=r?e:`${e.slice(0,r).trimEnd()}…`}function c(t=""){return n(t).split(/\n\s*\n/).map(e=>`<p>${e.replaceAll(`
+`,"<br />")}</p>`).join("")}export{o as e,i as f,c as p,s as r};

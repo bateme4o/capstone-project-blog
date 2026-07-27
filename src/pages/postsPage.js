@@ -13,6 +13,8 @@ export const postsPage = async (params) => {
     return;
   }
 
+  const editPostId = params.get('edit');
+
   // List all posts
   let html = `
     <div class="page-content">
@@ -100,10 +102,32 @@ export const postsPage = async (params) => {
   // Load and display posts
   await loadPosts();
 
+  if (editPostId) {
+    await editPost(editPostId);
+  }
+
   // Setup modal save handler
   const saveBtn = document.getElementById('savePostBtn');
   saveBtn.addEventListener('click', savePost);
 };
+
+function getPostModal() {
+  const modalElement = document.getElementById('postModal');
+  if (!modalElement) return null;
+
+  let modal = bootstrap.Modal.getInstance(modalElement);
+  if (!modal) {
+    modal = new bootstrap.Modal(modalElement);
+  }
+  return modal;
+}
+
+function resetPostModal() {
+  const modalTitle = document.querySelector('#postModal .modal-title');
+  if (modalTitle) {
+    modalTitle.innerHTML = '<i class="bi bi-pencil-square me-2"></i>Create Post';
+  }
+}
 
 async function loadPosts() {
   try {
@@ -262,9 +286,15 @@ async function savePost() {
     // Reset form and reload
     document.getElementById('postForm').reset();
     document.getElementById('postId').value = '';
-    const modal = bootstrap.Modal.getInstance(document.getElementById('postModal'));
-    modal.hide();
+    resetPostModal();
+
+    const modal = getPostModal();
+    if (modal) {
+      modal.hide();
+    }
+
     await loadPosts();
+    window.location.hash = '#posts';
   } catch (error) {
     console.error('Error saving post:', error);
     utils.showAlert('Error saving post', 'danger');
@@ -302,8 +332,10 @@ async function editPost(postId) {
     document.querySelector('#postModal .modal-title').innerHTML =
       '<i class="bi bi-pencil-square me-2"></i>Edit Post';
 
-    const modal = new bootstrap.Modal(document.getElementById('postModal'));
-    modal.show();
+    const modal = getPostModal();
+    if (modal) {
+      modal.show();
+    }
   } catch (error) {
     console.error('Error loading post for edit:', error);
     utils.showAlert('Error loading post', 'danger');

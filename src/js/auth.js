@@ -1,8 +1,62 @@
-// Mock auth for now - to be replaced with Supabase
+import { hasSupabaseConfig, supabase } from './supabaseClient.js';
+
 let currentUser = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null;
+
+const saveCurrentUser = (user) => {
+  currentUser = user;
+  localStorage.setItem('user', JSON.stringify(user));
+};
+
+const clearCurrentUser = () => {
+  localStorage.removeItem('user');
+  currentUser = null;
+};
 
 export const auth = {
   register: async (email, password, name) => {
+    if (hasSupabaseConfig) {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            display_name: name,
+            name
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const user = {
+        id: data.user?.id || Date.now().toString(),
+        email,
+        name,
+        isAdmin: false,
+        createdAt: data.user?.created_at || new Date().toISOString()
+      };
+
+      saveCurrentUser(user);
+
+      if (data.user?.id) {
+        try {
+          await supabase.from('user_profiles').upsert(
+            {
+              user_id: data.user.id,
+              display_name: name
+            },
+            { onConflict: 'user_id' }
+          );
+        } catch (profileError) {
+          console.warn('User profile bootstrap skipped:', profileError);
+        }
+      }
+
+      return user;
+    }
+
     const user = {
       id: Date.now().toString(),
       email,
@@ -10,13 +64,33 @@ export const auth = {
       isAdmin: false,
       createdAt: new Date().toISOString()
     };
-    localStorage.setItem('user', JSON.stringify(user));
-    currentUser = user;
+    saveCurrentUser(user);
     return user;
   },
 
   login: async (email, password) => {
-    // Mock login - in production this would validate against Supabase
+    if (hasSupabaseConfig) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      const user = {
+        id: data.user?.id || Date.now().toString(),
+        email: data.user?.email || email,
+        name: data.user?.user_metadata?.display_name || data.user?.user_metadata?.name || email.split('@')[0],
+        isAdmin: data.user?.user_metadata?.isAdmin || email === 'admin@blog.com',
+        createdAt: data.user?.created_at || new Date().toISOString()
+      };
+
+      saveCurrentUser(user);
+      return user;
+    }
+
     const user = {
       id: Date.now().toString(),
       email,
@@ -24,14 +98,16 @@ export const auth = {
       isAdmin: email === 'admin@blog.com',
       createdAt: new Date().toISOString()
     };
-    localStorage.setItem('user', JSON.stringify(user));
-    currentUser = user;
+    saveCurrentUser(user);
     return user;
   },
 
-  logout: () => {
-    localStorage.removeItem('user');
-    currentUser = null;
+  logout: async () => {
+    if (hasSupabaseConfig) {
+      await supabase.auth.signOut();
+    }
+
+    clearCurrentUser();
   },
 
   getCurrentUser: () => currentUser,
@@ -84,11 +160,10 @@ export const updateNavigation = () => {
   }
 };
 
-// Handle logout
-document.addEventListener('click', (e) => {
+document.addEventListener('click', async (e) => {
   if (e.target.closest('a[href="#logout"]')) {
     e.preventDefault();
-    auth.logout();
+    await auth.logout();
     updateNavigation();
     window.location.hash = '#home';
   }

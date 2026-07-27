@@ -1,0 +1,24 @@
+# Supabase Local Development Configuration
+# This file is for local development using Supabase CLI
+# For production, use Supabase cloud dashboard
+
+[db]
+port = 54321
+major_version = 15
+# Enable PGRST, Realtime, and Storage only if needed for local development
+enable_extensions = ["uuid-ossp", "pgtrgm"]
+
+[realtime]
+enabled = true
+max_bytes_per_second = 1048576
+
+[storage]
+file_size_limit = 52428800  # 50MB
+s3_host = "localhost"
+s3_protocol = "http"
+s3_region = "local"
+
+[auth]
+enable_signup = true
+enable_email_confirmations = true
+jwt_exp = 3600

@@ -100,8 +100,11 @@ export const auth = {
       });
 
       if (error) {
-        throw error;
+        console.error('Supabase signup error:', error);
+        throw new Error(error.message || 'Signup failed');
       }
+
+      console.log('User registered successfully:', data.user?.id);
 
       // Get session and setup token refresh
       const { data: sessionData } = await supabase.auth.getSession();

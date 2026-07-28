@@ -110,7 +110,9 @@ export const registerPage = () => {
         window.location.hash = '#home';
       }, 1000);
     } catch (error) {
-      utils.showAlert('Registration failed. Please try again.', 'danger');
+      console.error('Registration error:', error);
+      const errorMessage = error?.message || 'Registration failed. Please try again.';
+      utils.showAlert(errorMessage, 'danger');
     }
   });
 };

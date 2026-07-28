@@ -1,0 +1,7 @@
+[build]
+  command = "npm install && npm run build"
+  publish = "dist"
+
+[env.production]
+  VITE_SUPABASE_URL = "https://ugbvucelkovciaenodee.supabase.co"
+  VITE_SUPABASE_KEY = "sb_publishable_JXLx8Fy_HV5wOvYsfFhNvQ_DnqnjI9f"

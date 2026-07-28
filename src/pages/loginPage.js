@@ -44,21 +44,7 @@ export const loginPage = () => {
           </p>
         </div>
 
-        <div class="mt-4 p-3 bg-light rounded">
-          <p class="text-muted mb-2"><small><i class="bi bi-info-circle"></i> Demo Credentials:</small></p>
-          <small>
-            <div class="mb-2">
-              <strong>Regular User:</strong><br>
-              Email: user@blog.com<br>
-              Password: any password
-            </div>
-            <div>
-              <strong>Admin User:</strong><br>
-              Email: admin@blog.com<br>
-              Password: any password
-            </div>
-          </small>
-        </div>
+        
       </div>
     </div>
   `;

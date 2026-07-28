@@ -1,161 +1,38 @@
 -- Migration 008: Seed Test Data
--- Purpose: Create test users and posts for development/testing
+-- Purpose: Create test posts for development/testing
 -- Created: 2026-07-28
 
--- Note: Test user IDs are generated UUIDs. These users need to be created in Supabase Auth separately.
--- Use the Supabase dashboard to create auth users, then uncomment the INSERT statements below.
+-- NOTE: This migration creates test POSTS ONLY.
+-- User profiles must be created via Supabase Auth first, then use their real IDs below.
+-- The posts are seeded with your existing admin user (eeb82ae8-9102-4bf7-a9b5-58b0107c5848)
+-- and can be edited after creation to assign to other users.
 
--- Test User 1: Alice Johnson
--- Email: alice@example.com
--- Password: (create in Supabase Auth)
--- User ID: (will be provided by Supabase Auth)
-INSERT INTO public.users (id, email, is_active, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  'alice@example.com',
-  true,
-  now(),
-  now()
-) ON CONFLICT (id) DO NOTHING;
+-- STEP 1: Create test users in Supabase Auth first!
+-- 1. Go to Authentication → Users
+-- 2. Click "Add user" for each:
+--    - alice@example.com (Password: Alice123!)
+--    - bob@example.com (Password: Bob123!)
+--    - carol@example.com (Password: Carol123!)
+--    - david@example.com (Password: David123!)
+--    - emma@example.com (Password: Emma123!)
+-- 3. Copy each user ID and replace the UUIDs below
 
-INSERT INTO public.user_profiles (user_id, display_name, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  'Alice Johnson',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
+-- STEP 2: After creating auth users, run these manual SQL commands:
 
-INSERT INTO public.user_roles (user_id, role, assigned_by, assigned_at, created_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  'user',
-  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
+-- For Alice (after getting her auth user ID, replace 'ALICE_USER_ID_HERE'):
+-- INSERT INTO public.user_profiles (user_id, display_name) VALUES ('ALICE_USER_ID_HERE', 'Alice Johnson');
+-- INSERT INTO public.user_roles (user_id, role, assigned_by, assigned_at) VALUES ('ALICE_USER_ID_HERE', 'user', 'ALICE_USER_ID_HERE', now());
 
--- Test User 2: Bob Smith (Admin)
--- Email: bob@example.com
--- Password: (create in Supabase Auth)
-INSERT INTO public.users (id, email, is_active, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
-  'bob@example.com',
-  true,
-  now(),
-  now()
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.user_profiles (user_id, display_name, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
-  'Bob Smith',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
-INSERT INTO public.user_roles (user_id, role, assigned_by, assigned_at, created_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
-  'admin',
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
--- Test User 3: Carol White
--- Email: carol@example.com
--- Password: (create in Supabase Auth)
-INSERT INTO public.users (id, email, is_active, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d481',
-  'carol@example.com',
-  true,
-  now(),
-  now()
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.user_profiles (user_id, display_name, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d481',
-  'Carol White',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
-INSERT INTO public.user_roles (user_id, role, assigned_by, assigned_at, created_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d481',
-  'user',
-  'f47ac10b-58cc-4372-a567-0e02b2c3d481',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
--- Test User 4: David Brown
--- Email: david@example.com
--- Password: (create in Supabase Auth)
-INSERT INTO public.users (id, email, is_active, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
-  'david@example.com',
-  true,
-  now(),
-  now()
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.user_profiles (user_id, display_name, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
-  'David Brown',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
-INSERT INTO public.user_roles (user_id, role, assigned_by, assigned_at, created_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
-  'user',
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
--- Test User 5: Emma Davis
--- Email: emma@example.com
--- Password: (create in Supabase Auth)
-INSERT INTO public.users (id, email, is_active, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d483',
-  'emma@example.com',
-  true,
-  now(),
-  now()
-) ON CONFLICT (id) DO NOTHING;
-
-INSERT INTO public.user_profiles (user_id, display_name, created_at, updated_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d483',
-  'Emma Davis',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
-
-INSERT INTO public.user_roles (user_id, role, assigned_by, assigned_at, created_at)
-VALUES (
-  'f47ac10b-58cc-4372-a567-0e02b2c3d483',
-  'user',
-  'f47ac10b-58cc-4372-a567-0e02b2c3d483',
-  now(),
-  now()
-) ON CONFLICT (user_id) DO NOTHING;
+-- For now, we'll just seed posts - they'll be authored by your current admin user
+-- Posts can be reassigned to other users after creation via direct SQL update
 
 -- ============================================================
 -- TEST ARTICLES (POSTS)
+-- All posts seeded with admin user. Can be reassigned after creation.
 -- ============================================================
 
--- Alice's Posts (2 posts)
+-- Admin User ID: eeb82ae8-9102-4bf7-a9b5-58b0107c5848
+-- Post 1: Getting Started with Web Development
 INSERT INTO public.articles (id, slug, title, excerpt, content, image, status, published_at, author_id, created_at, updated_at)
 VALUES (
   'a1111111-1111-1111-1111-111111111111',
@@ -168,7 +45,7 @@ We''ll cover the fundamentals of HTML, CSS, and JavaScript - the three pillars o
   'https://via.placeholder.com/600x300?text=Web+Development',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -185,7 +62,7 @@ In this article, we''ll explore async/await syntax, error handling, and best pra
   'https://via.placeholder.com/600x300?text=JavaScript+Async',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -203,7 +80,7 @@ We''ll also discuss common pitfalls and how to avoid them.',
   'https://via.placeholder.com/600x300?text=Database+Design',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -220,7 +97,7 @@ From naming conventions to versioning strategies, you''ll learn how to design AP
   'https://via.placeholder.com/600x300?text=API+Design',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -237,7 +114,7 @@ We''ll also discuss test-driven development (TDD) and how it can improve your co
   'https://via.placeholder.com/600x300?text=Testing+Strategies',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d480',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -255,7 +132,7 @@ This guide will take you from CSS Grid basics to advanced techniques, with pract
   'https://via.placeholder.com/600x300?text=CSS+Grid',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d481',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -272,7 +149,7 @@ Learn about mobile-first design, viewport settings, media queries, and modern CS
   'https://via.placeholder.com/600x300?text=Responsive+Design',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d481',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -290,7 +167,7 @@ We''ll cover branching strategies, commit messages, and collaboration patterns t
   'https://via.placeholder.com/600x300?text=Git+Workflow',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -307,7 +184,7 @@ This guide covers Docker basics, working with images and containers, and orchest
   'https://via.placeholder.com/600x300?text=Docker',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -324,7 +201,7 @@ Whether you''re just getting started with Kubernetes or looking to deepen your u
   'https://via.placeholder.com/600x300?text=Kubernetes',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d482',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -342,7 +219,7 @@ We''ll cover supervised vs unsupervised learning, training vs testing, and how t
   'https://via.placeholder.com/600x300?text=Machine+Learning',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d483',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;
@@ -359,7 +236,7 @@ From SQL injection to cross-site scripting, you''ll learn how to build secure we
   'https://via.placeholder.com/600x300?text=Web+Security',
   'published',
   now(),
-  'f47ac10b-58cc-4372-a567-0e02b2c3d483',
+  'eeb82ae8-9102-4bf7-a9b5-58b0107c5848',
   now(),
   now()
 ) ON CONFLICT (id) DO NOTHING;

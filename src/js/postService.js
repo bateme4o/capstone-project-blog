@@ -41,6 +41,7 @@ const mapArticleRow = (article) => ({
   excerpt: article.excerpt || '',
   content: article.content || '',
   author: article.author_name || article.author_email || 'Unknown author',
+  authorEmail: article.author_email || null,
   image: article.featured_image_url || 'https://via.placeholder.com/600x300?text=Post',
   tags: Array.isArray(article.tags) ? article.tags.filter(Boolean) : [],
   createdAt: article.published_at || article.created_at || new Date().toISOString(),

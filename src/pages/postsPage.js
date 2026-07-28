@@ -145,6 +145,13 @@ function resetPostModal() {
   }
 }
 
+function canManagePost(post) {
+  const user = auth.getCurrentUser();
+  if (!user) return false;
+  if (auth.isAdmin()) return true;
+  return !!post.authorEmail && post.authorEmail === user.email;
+}
+
 async function loadPosts() {
   try {
     utils.showSpinner('postsContainer');
@@ -155,17 +162,18 @@ async function loadPosts() {
       return;
     }
 
-    const user = auth.getCurrentUser();
     let html = '<div class="posts-grid">';
 
     posts.forEach(post => {
-      const editBtn = user ? `
+      const canManage = canManagePost(post);
+
+      const editBtn = canManage ? `
         <button class="btn btn-sm btn-warning" onclick="editPost('${post.id}')">
           <i class="bi bi-pencil"></i>
         </button>
       ` : '';
 
-      const deleteBtn = user ? `
+      const deleteBtn = canManage ? `
         <button class="btn btn-sm btn-danger" onclick="deletePost('${post.id}')">
           <i class="bi bi-trash"></i>
         </button>
@@ -213,16 +221,21 @@ async function viewSinglePost(postId) {
     }
 
     const user = auth.getCurrentUser();
+    const canManage = canManagePost(post);
     let actionBtns = '';
     if (user) {
-      actionBtns = `
-        <div class="btn-group-custom mt-3">
+      const editDeleteBtns = canManage ? `
           <button class="btn btn-warning" onclick="editPost('${post.id}')">
             <i class="bi bi-pencil"></i>Edit
           </button>
           <button class="btn btn-danger" onclick="deletePost('${post.id}')">
             <i class="bi bi-trash"></i>Delete
           </button>
+      ` : '';
+
+      actionBtns = `
+        <div class="btn-group-custom mt-3">
+          ${editDeleteBtns}
           <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#postFilesModal" onclick="window.loadPostFiles('${post.id}')">
             <i class="bi bi-file-earmark"></i>Files
           </button>
@@ -336,6 +349,12 @@ async function savePost() {
 }
 
 async function deletePost(postId) {
+  const post = await postService.getPostById(postId);
+  if (!post || !canManagePost(post)) {
+    utils.showAlert('You do not have permission to delete this post', 'danger');
+    return;
+  }
+
   if (!confirm('Are you sure you want to delete this post?')) return;
 
   try {
@@ -353,6 +372,11 @@ async function editPost(postId) {
     const post = await postService.getPostById(postId);
     if (!post) {
       utils.showAlert('Post not found', 'danger');
+      return;
+    }
+
+    if (!canManagePost(post)) {
+      utils.showAlert('You do not have permission to edit this post', 'danger');
       return;
     }
 

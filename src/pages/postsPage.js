@@ -1,5 +1,6 @@
 import { auth } from '../js/auth.js';
 import { postService } from '../js/postService.js';
+import { fileService } from '../js/fileService.js';
 import { utils } from '../js/utils.js';
 
 export const postsPage = async (params) => {
@@ -83,6 +84,15 @@ export const postsPage = async (params) => {
                        placeholder="JavaScript, Web, Tutorial">
               </div>
 
+              <div class="mb-3">
+                <label for="postFiles" class="form-label">
+                  <i class="bi bi-file-earmark-arrow-up me-1"></i>Upload Files
+                </label>
+                <input type="file" class="form-control" id="postFiles" multiple>
+                <small class="text-muted d-block mt-2">Upload images, documents, or other files to attach to this post</small>
+                <div id="uploadedFilesList" class="mt-2"></div>
+              </div>
+
               <input type="hidden" id="postId">
             </form>
           </div>
@@ -109,6 +119,12 @@ export const postsPage = async (params) => {
   // Setup modal save handler
   const saveBtn = document.getElementById('savePostBtn');
   saveBtn.addEventListener('click', savePost);
+
+  // Setup file upload handler
+  const filesInput = document.getElementById('postFiles');
+  if (filesInput) {
+    filesInput.addEventListener('change', handleFileUpload);
+  }
 };
 
 function getPostModal() {
@@ -207,6 +223,9 @@ async function viewSinglePost(postId) {
           <button class="btn btn-danger" onclick="deletePost('${post.id}')">
             <i class="bi bi-trash"></i>Delete
           </button>
+          <button class="btn btn-info" data-bs-toggle="modal" data-bs-target="#postFilesModal" onclick="window.loadPostFiles('${post.id}')">
+            <i class="bi bi-file-earmark"></i>Files
+          </button>
         </div>
       `;
     }
@@ -237,6 +256,21 @@ async function viewSinglePost(postId) {
 
             ${actionBtns}
           </article>
+        </div>
+      </div>
+
+      <!-- Post Files Modal -->
+      <div class="modal fade" id="postFilesModal" tabindex="-1">
+        <div class="modal-dialog">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title"><i class="bi bi-file-earmark me-2"></i>Post Files</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div id="postFilesContainer"></div>
+            </div>
+          </div>
         </div>
       </div>
     `;
@@ -342,6 +376,163 @@ async function editPost(postId) {
   }
 }
 
+async function handleFileUpload(event) {
+  const files = event.target.files;
+  if (files.length === 0) return;
+
+  const postId = document.getElementById('postId').value;
+  const uploadedFilesList = document.getElementById('uploadedFilesList');
+
+  if (!uploadedFilesList) return;
+
+  let html = '<div class="uploaded-files"><small class="text-muted">Uploading files...</small></div>';
+  uploadedFilesList.innerHTML = html;
+
+  const uploadedFiles = [];
+
+  for (const file of files) {
+    try {
+      const result = await fileService.uploadFile(file, postId || null);
+      if (result) {
+        uploadedFiles.push(result);
+      }
+    } catch (error) {
+      console.error('Error uploading file:', error);
+      utils.showAlert(`Error uploading ${file.name}`, 'danger');
+    }
+  }
+
+  if (uploadedFiles.length > 0) {
+    html = `
+      <div class="uploaded-files">
+        <small class="text-success"><i class="bi bi-check-circle"></i> ${uploadedFiles.length} file(s) uploaded</small>
+        <ul class="list-unstyled mt-2">
+    `;
+
+    uploadedFiles.forEach(file => {
+      html += `
+        <li class="d-flex justify-content-between align-items-center py-1">
+          <span><i class="bi bi-file-earmark"></i> ${file.name}</span>
+          <small class="text-muted">${(file.size / 1024).toFixed(0)} KB</small>
+        </li>
+      `;
+    });
+
+    html += `
+        </ul>
+      </div>
+    `;
+    uploadedFilesList.innerHTML = html;
+
+    utils.showAlert('Files uploaded successfully', 'success');
+
+    // Store uploaded files for later reference
+    window.currentPostFiles = uploadedFiles;
+  } else {
+    uploadedFilesList.innerHTML = '';
+  }
+
+  // Clear file input
+  event.target.value = '';
+}
+
+async function loadPostFiles(postId) {
+  try {
+    const files = await fileService.getArticleFiles(postId);
+
+    if (files.length === 0) {
+      document.getElementById('postFilesContainer').innerHTML =
+        '<p class="text-muted text-center"><i class="bi bi-inbox"></i> No files attached</p>';
+      return;
+    }
+
+    let html = `
+      <div class="table-responsive">
+        <table class="table table-sm">
+          <thead class="table-light">
+            <tr>
+              <th>File Name</th>
+              <th>Size</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+    `;
+
+    files.forEach(file => {
+      const sizeKB = (file.size / 1024).toFixed(0);
+      html += `
+        <tr>
+          <td>
+            <i class="bi bi-file-earmark"></i> ${file.name}
+          </td>
+          <td><small>${sizeKB} KB</small></td>
+          <td>
+            <button class="btn btn-sm btn-primary" onclick="window.downloadFile('${file.path}', '${file.name}')">
+              <i class="bi bi-download"></i>
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="window.deletePostFile('${file.id}', '${file.path}')">
+              <i class="bi bi-trash"></i>
+            </button>
+          </td>
+        </tr>
+      `;
+    });
+
+    html += `
+          </tbody>
+        </table>
+      </div>
+    `;
+
+    document.getElementById('postFilesContainer').innerHTML = html;
+  } catch (error) {
+    console.error('Error loading post files:', error);
+    utils.showAlert('Error loading files', 'danger');
+  }
+}
+
+async function downloadFile(filePath, fileName) {
+  try {
+    const url = await fileService.getDownloadUrl(filePath, 3600);
+    if (!url) {
+      utils.showAlert('Error generating download link', 'danger');
+      return;
+    }
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName || 'file';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  } catch (error) {
+    console.error('Error downloading file:', error);
+    utils.showAlert('Error downloading file', 'danger');
+  }
+}
+
+async function deletePostFile(fileId, filePath) {
+  if (!confirm('Delete this file?')) return;
+
+  try {
+    await fileService.deleteFile(fileId, filePath);
+    utils.showAlert('File deleted successfully', 'success');
+
+    // Reload files if modal is open
+    const currentPostId = document.getElementById('postId')?.value;
+    if (currentPostId) {
+      await loadPostFiles(currentPostId);
+    }
+  } catch (error) {
+    console.error('Error deleting file:', error);
+    utils.showAlert('Error deleting file', 'danger');
+  }
+}
+
 // Make functions global for onclick handlers
 window.editPost = editPost;
 window.deletePost = deletePost;
+window.loadPostFiles = loadPostFiles;
+window.downloadFile = downloadFile;
+window.deletePostFile = deletePostFile;

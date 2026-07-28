@@ -2,6 +2,7 @@ import { homePage } from '../pages/homePage.js';
 import { loginPage } from '../pages/loginPage.js';
 import { registerPage } from '../pages/registerPage.js';
 import { postsPage } from '../pages/postsPage.js';
+import { filesPage } from '../pages/filesPage.js';
 import { adminPage } from '../pages/adminPage.js';
 import { auth } from './auth.js';
 
@@ -10,6 +11,7 @@ const routes = {
   login: loginPage,
   register: registerPage,
   posts: postsPage,
+  files: filesPage,
   admin: adminPage
 };
 
@@ -22,7 +24,7 @@ export const router = async () => {
   if (!appContainer) return;
 
   // Check authentication for protected routes
-  if (['posts', 'admin'].includes(page) && !auth.isLoggedIn()) {
+  if (['posts', 'files', 'admin'].includes(page) && !auth.isLoggedIn()) {
     window.location.hash = '#login';
     return;
   }

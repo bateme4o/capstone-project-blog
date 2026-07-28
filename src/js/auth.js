@@ -289,15 +289,27 @@ export const updateNavigation = () => {
 
   if (auth.isLoggedIn()) {
     navPosts.style.display = 'block';
+
+    const userRole = currentUser?.role || 'user';
+    const adminBadge = auth.isAdmin() ? '<span class="badge bg-danger ms-1">Admin</span>' : '';
+
     navAuth.innerHTML = `
       <a class="nav-link dropdown-toggle" href="#" id="userDropdown" data-bs-toggle="dropdown">
-        <i class="bi bi-person-circle me-1"></i>${currentUser.name}
+        <i class="bi bi-person-circle me-1"></i>${currentUser.name}${adminBadge}
       </a>
       <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-        <li><a class="dropdown-item" href="#profile">Profile</a></li>
-        <li><a class="dropdown-item" href="#settings">Settings</a></li>
+        <li class="dropdown-header">
+          <small class="text-muted">Logged in as <strong>${currentUser.email}</strong></small>
+        </li>
         <li><hr class="dropdown-divider"></li>
-        <li><a class="dropdown-item" href="#logout">Logout</a></li>
+        <li><a class="dropdown-item" href="#profile"><i class="bi bi-person me-2"></i>Profile</a></li>
+        <li><a class="dropdown-item" href="#posts"><i class="bi bi-file-earmark me-2"></i>My Posts</a></li>
+        <li><a class="dropdown-item" href="#files"><i class="bi bi-folder me-2"></i>My Files</a></li>
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#settings"><i class="bi bi-gear me-2"></i>Settings</a></li>
+        ${auth.isAdmin() ? '<li><a class="dropdown-item" href="#admin"><i class="bi bi-shield-lock me-2"></i>Admin Panel</a></li>' : ''}
+        <li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item" href="#logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
       </ul>
     `;
 

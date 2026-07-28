@@ -1,6 +1,10 @@
 [build]
-  command = "npm install && npm run build"
+  command = "npm run build"
   publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "18"
+  NPM_VERSION = "9"
 
 [env.production]
   VITE_SUPABASE_URL = "https://ugbvucelkovciaenodee.supabase.co"

@@ -37,6 +37,7 @@ WHERE role = 'admin'
 -- STEP 3: Close the privilege-escalation hole
 -- ============================================================
 DROP POLICY IF EXISTS "Authenticated users can insert their role" ON public.user_roles;
+DROP POLICY IF EXISTS "Users can bootstrap their own default role" ON public.user_roles;
 
 -- Replacement: a user may only insert a role row for THEMSELVES, and only
 -- with role = 'user'. Admin-driven role assignment/promotion still works
